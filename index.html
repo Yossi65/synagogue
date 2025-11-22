@@ -1,12 +1,4 @@
-
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>code_2025-11-22T21-21-14-119Z.html</title>
-                </head>
-                <body>
-                    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -44,9 +36,9 @@
     <h1>מחולל מודעות שבת</h1>
     
     <div style="text-align:center; margin-bottom: 20px; padding: 10px; background: #e3f2fd; border-radius: 8px;">
-        <p id="imageStatus">מחפש תמונת רקע...</p>
-        <div style="font-size: 12px; color: #666;">(אם התמונה לא נטענת אוטומטית, ניתן להעלות ידנית:)</div>
-        <input type="file" id="bgImageInput" accept="image/png, image/jpeg" style="margin-top:5px;">
+        <p id="imageStatus">טוען תמונת רקע מהענן...</p>
+        <input type="file" id="bgImageInput" accept="image/png, image/jpeg" style="display:none; margin-top:5px;"> 
+        <button onclick="document.getElementById('bgImageInput').style.display='inline-block'" style="background:none; border:none; text-decoration:underline; color:#666; font-size:12px; cursor:pointer;">(העלאה ידנית במקרה של תקלה)</button>
     </div>
 
     <div class="slider-container">
@@ -125,27 +117,27 @@
     const ctx = canvas.getContext('2d');
     const imageStatus = document.getElementById('imageStatus');
 
-    // --- טעינה אוטומטית מהרשת ---
+    // --- טעינה אוטומטית מהענן ---
     window.onload = function() {
-        // 1. נסיון לטעון תמונה מהשרת (background.png)
         const img = new Image();
-        img.src = './background.png'; // התיקון הוא כאן - סיומת png
+        // כאן השינוי: קישור ישיר לקובץ שלך בגיטהאב
+        img.src = 'https://raw.githubusercontent.com/Yossi65/synagogue/main/background.png';
+        img.crossOrigin = "Anonymous"; // חשוב כדי לאפשר הורדה
         
         img.onload = function() {
             loadedBgImage = img;
             canvas.width = img.width;
             canvas.height = img.height;
-            imageStatus.innerText = "✅ תמונת רקע נטענה בהצלחה מהאתר!";
+            imageStatus.innerText = "✅ תמונת רקע נטענה בהצלחה מהענן!";
             imageStatus.style.color = "green";
-            document.getElementById('bgImageInput').style.display = 'none'; // הסתרת כפתור העלאה
         };
 
         img.onerror = function() {
-            imageStatus.innerText = "⚠️ לא נמצאה תמונת רקע (background.png). נא להעלות ידנית.";
+            imageStatus.innerText = "⚠️ לא הצלחתי לטעון את התמונה מהענן. נסה לרענן או להעלות ידנית.";
             imageStatus.style.color = "red";
         };
 
-        // 2. טעינת נתונים שמורים
+        // טעינת נתונים
         const savedData = localStorage.getItem('shabbatFormData');
         if (savedData) {
             const data = JSON.parse(savedData);
@@ -156,7 +148,7 @@
         }
     };
 
-    // גיבוי - העלאה ידנית
+    // גיבוי ידני
     document.getElementById('bgImageInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -175,7 +167,7 @@
         reader.readAsDataURL(file);
     });
 
-    // שעונים אוטומטיים
+    // שעונים
     document.querySelectorAll('.time-input').forEach(input => {
         input.addEventListener('blur', function() {
             let val = this.value.replace(/[^0-9]/g, '');
@@ -188,7 +180,6 @@
         });
     });
 
-    // פונקציות שמירה
     function saveFormData() {
         const inputs = document.querySelectorAll('input[type="text"], input[type="tel"], textarea, select');
         const data = {};
@@ -263,7 +254,7 @@
     function fallbackCopy(txt) { txt.select(); document.execCommand('copy'); alert("הועתק!"); }
 
     function generateImage() {
-        if (!loadedBgImage) { alert("אין תמונת רקע!"); return; }
+        if (!loadedBgImage) { alert("התמונה עדיין נטענת או שיש שגיאה. נסה לרענן."); return; }
         const data = getFormData();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(loadedBgImage, 0, 0);
@@ -308,18 +299,18 @@
         draw(data.time_class_arvit ? `שיעור לפני ערבית - ${data.time_class_arvit}` : '');
         draw(data.time_arvit_motzash ? `ערבית מוצ"ש - ${data.time_arvit_motzash}` : '');
 
-        // פוטר קבוע
+        // פוטר קבוע (מיקום מתוקן)
         ctx.font = 'bold ' + (fontSize * 1.2) + 'px serif';
-        ctx.fillText("שבת שלום", centerX, canvas.height * 0.83);
+        ctx.fillText("שבת שלום", centerX, canvas.height * 0.83); // שבת שלום ב-83%
 
         ctx.font = 'bold ' + (fontSize * 0.65) + 'px serif';
-        ctx.fillText("תפילות בשאר ימות השבוע:", centerX, canvas.height * 0.905);
+        ctx.fillText("תפילות בשאר ימות השבוע:", centerX, canvas.height * 0.905); // כותרת ב-90.5%
         
         let weekMsg = "";
         if(data.time_week_shacharit) weekMsg += `שחרית (שישי) - ${data.time_week_shacharit}`;
         if(data.time_week_shacharit && data.time_week_arvit) weekMsg += `, `;
         if(data.time_week_arvit) weekMsg += `ערבית - ${data.time_week_arvit}`;
-        ctx.fillText(weekMsg, centerX, canvas.height * 0.94);
+        ctx.fillText(weekMsg, centerX, canvas.height * 0.94); // זמנים ב-94%
 
         document.getElementById('finalImage').src = canvas.toDataURL('image/jpeg', 0.9);
         document.getElementById('generated-image-container').style.display = 'block';
@@ -329,6 +320,3 @@
 </script>
 </body>
 </html>
-                </body>
-                </html>
-            
